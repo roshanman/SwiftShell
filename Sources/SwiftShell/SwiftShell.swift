@@ -14,26 +14,17 @@ public struct Shell {
     
     @discardableResult
     public func run() throws -> String {
-        let sourceCode = """
-        system <<'EOC'
-        \(sourceCode)
-        EOC
-        """
         
         let process = Process()
-        let stdinPipe = Pipe()
         let stdoutPipe = Pipe()
         let stdErrPipe = Pipe()
         
-        process.launchPath = "/usr/bin/ruby"
+        process.launchPath = "/bin/zsh"
+        process.arguments = ["-c", sourceCode]
         process.standardOutput = stdoutPipe
-        process.standardInput = stdinPipe
         process.standardError = stdErrPipe
-        
-        let data = sourceCode.data(using: .utf8)!
-        try stdinPipe.fileHandleForWriting.write(contentsOf: data)
-        stdinPipe.fileHandleForWriting.closeFile()
-        
+        process.standardInput = nil
+
         process.launch()
         process.waitUntilExit()
         

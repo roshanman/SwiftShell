@@ -9,6 +9,3 @@ For example, you can write:
 let output: String = try Shell("echo Hello SwiftShell | sed 's/SwiftShell/World/g'").run()
 print(output)
 ```
-
-## Note
-The SwiftShell library dependency `Ruby`
