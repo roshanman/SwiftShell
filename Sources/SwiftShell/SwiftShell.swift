@@ -2,8 +2,11 @@ import Foundation
 
 public struct SwiftShellError: Error {
     public let sourceCode: String
-    public let errorMessage: String
+    public let error: Error
+    public let terminationStatus: Int32
 }
+
+extension String: Error { }
 
 public struct Shell {
     let sourceCode: String
@@ -16,26 +19,32 @@ public struct Shell {
     public func run() throws -> String {
         
         let process = Process()
-        let stdoutPipe = Pipe()
-        let stdErrPipe = Pipe()
+        let pipe = Pipe()
         
-        process.launchPath = "/bin/zsh"
+        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
         process.arguments = ["-c", sourceCode]
-        process.standardOutput = stdoutPipe
-        process.standardError = stdErrPipe
+        process.standardOutput = pipe
+        process.standardError = pipe
         process.standardInput = nil
 
-        process.launch()
-        process.waitUntilExit()
-        
-        let errorData = stdErrPipe.fileHandleForReading.readDataToEndOfFile()
-        if !errorData.isEmpty {
-            let errorMessage = String(data: errorData, encoding: String.Encoding.utf8)!
-            throw SwiftShellError(sourceCode: self.sourceCode, errorMessage: errorMessage)
+        do {
+            try process.run()
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let output = String(data: data, encoding: String.Encoding.utf8)!
+
+            process.waitUntilExit()
+            
+            if process.terminationStatus != 0 {
+                throw output
+            }
+
+            return output
+        } catch {
+            throw SwiftShellError(
+                sourceCode: sourceCode,
+                error: error,
+                terminationStatus: process.terminationStatus
+            )
         }
-        
-        let outputData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
-        
-        return String(data: outputData, encoding: String.Encoding.utf8)!
     }
 }
