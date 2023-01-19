@@ -9,7 +9,7 @@ public struct SwiftShellError: Error {
 extension String: Error { }
 
 public struct Shell {
-    let sourceCode: String
+    public let sourceCode: String
     
     public init(_ sourceCode: String) {
         self.sourceCode = sourceCode
@@ -21,7 +21,7 @@ public struct Shell {
         let process = Process()
         let pipe = Pipe()
         
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+        process.executableURL = URL(fileURLWithPath: "/bin/zsh") ?? URL(fileURLWithPath: "/bin/bash")
         process.arguments = ["-c", sourceCode]
         process.standardOutput = pipe
         process.standardError = pipe
@@ -34,10 +34,6 @@ public struct Shell {
 
             process.waitUntilExit()
             
-            if process.terminationStatus != 0 {
-                throw output
-            }
-
             return output
         } catch {
             throw SwiftShellError(
