@@ -43,4 +43,17 @@ public struct Shell {
             )
         }
     }
+    
+    @discardableResult
+    public func runAndExpectZero() throws -> String {
+        let (exitCode, output) = try run()
+        guard exitCode == 0 else {
+            throw SwiftShellError(
+                sourceCode: sourceCode,
+                error: "exit code is not zero(\(exitCode))",
+                terminationStatus: exitCode
+            )
+        }
+        return output
+    }
 }
