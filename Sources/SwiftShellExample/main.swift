@@ -15,7 +15,7 @@ do {
     let output4 = try Shell("find ~/Desktop -maxdepth 2 -name '*.swift'").run()
     print(output4)
 
-    try Shell("error command").run()
+    print(try Shell("error command").run())
 } catch {
     print(error)
 }

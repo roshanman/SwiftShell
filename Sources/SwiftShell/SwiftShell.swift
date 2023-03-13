@@ -16,12 +16,12 @@ public struct Shell {
     }
     
     @discardableResult
-    public func run() throws -> String {
+    public func run() throws -> (exitCode: Int32, output: String) {
         
         let process = Process()
         let pipe = Pipe()
         
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh") ?? URL(fileURLWithPath: "/bin/bash")
+        process.executableURL = URL(string: "file:///bin/zsh") ?? URL(fileURLWithPath: "/bin/bash")
         process.arguments = ["-c", sourceCode]
         process.standardOutput = pipe
         process.standardError = pipe
@@ -34,7 +34,7 @@ public struct Shell {
 
             process.waitUntilExit()
             
-            return output
+            return (process.terminationStatus, output)
         } catch {
             throw SwiftShellError(
                 sourceCode: sourceCode,
