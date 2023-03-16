@@ -50,10 +50,21 @@ public struct Shell {
         guard exitCode == 0 else {
             throw SwiftShellError(
                 sourceCode: sourceCode,
-                error: "exit code is not zero(\(exitCode))",
+                error: output,
                 terminationStatus: exitCode
             )
         }
         return output
+    }
+    
+    public func runAndIgnore() throws {
+        let process = Process()
+        
+        process.executableURL = URL(string: "file:///bin/zsh") ?? URL(fileURLWithPath: "/bin/bash")
+        process.arguments = ["-c", sourceCode]
+        
+        try process.run()
+        
+        process.waitUntilExit()
     }
 }

@@ -3,6 +3,9 @@ import SwiftShell
 
 
 do {
+    
+    try Shell("for i in $(seq 1 10);do echo $i; sleep 1; done").runAndIgnore()
+    
     let output1 = try Shell("echo Hello SwiftShell").run()
     print(output1)
     
